@@ -1,0 +1,140 @@
+Executing query 0
+0-th query finished in 1.132967233657837, with planning_time 66.897 ms and execution_time 1051.461 ms
+Executing query 1
+1-th query finished in 1.0410740375518799, with planning_time 0.936 ms and execution_time 1016.166 ms
+Executing query 2
+2-th query finished in 1.010486364364624, with planning_time 0.415 ms and execution_time 1009.493 ms
+Executing query 3
+3-th query finished in 1.005800485610962, with planning_time 0.397 ms and execution_time 1004.849 ms
+Executing query 4
+4-th query finished in 3.60638165473938, with planning_time 0.519 ms and execution_time 3605.181 ms
+Executing query 5
+5-th query finished in 34.78265333175659, with planning_time 0.55 ms and execution_time 34781.208 ms
+Executing query 6
+6-th query finished in 17.05032253265381, with planning_time 0.438 ms and execution_time 17049.093 ms
+Executing query 7
+7-th query finished in 62.39638686180115, with planning_time 0.431 ms and execution_time 62395.171 ms
+Executing query 8
+8-th query finished in 4.3138158321380615, with planning_time 0.426 ms and execution_time 4312.596 ms
+Executing query 9
+9-th query finished in 2.7897109985351562, with planning_time 0.421 ms and execution_time 2788.512 ms
+Executing query 10
+10-th query finished in 5.495016813278198, with planning_time 0.413 ms and execution_time 5493.784 ms
+Executing query 11
+11-th query finished in 14.256724119186401, with planning_time 0.42 ms and execution_time 14255.543 ms
+Executing query 12
+12-th query finished in 11.710625886917114, with planning_time 0.504 ms and execution_time 11709.282 ms
+Executing query 13
+13-th query finished in 17.126232862472534, with planning_time 0.439 ms and execution_time 17125.025 ms
+Executing query 14
+14-th query finished in 12.950819253921509, with planning_time 0.576 ms and execution_time 12949.398 ms
+Executing query 15
+15-th query finished in 13.1962411403656, with planning_time 0.43 ms and execution_time 13195.077 ms
+Executing query 16
+16-th query finished in 11.955814838409424, with planning_time 0.433 ms and execution_time 11954.594 ms
+Executing query 17
+17-th query finished in 11.943372249603271, with planning_time 0.427 ms and execution_time 11942.146 ms
+Executing query 18
+18-th query finished in 64.51624011993408, with planning_time 0.413 ms and execution_time 64515.083 ms
+Executing query 19
+19-th query finished in 24.49006700515747, with planning_time 0.219 ms and execution_time 24489.139 ms
+Executing query 20
+20-th query finished in 13.213428497314453, with planning_time 0.223 ms and execution_time 13212.438 ms
+Executing query 21
+21-th query finished in 32.12941098213196, with planning_time 0.214 ms and execution_time 32128.438 ms
+Executing query 22
+22-th query finished in 25.080828428268433, with planning_time 0.435 ms and execution_time 25079.652 ms
+Executing query 23
+23-th query finished in 16.386842250823975, with planning_time 0.402 ms and execution_time 16385.64 ms
+Executing query 24
+24-th query finished in 11.309522151947021, with planning_time 0.41 ms and execution_time 11308.112 ms
+Executing query 25
+25-th query finished in 17.113369464874268, with planning_time 0.413 ms and execution_time 17112.173 ms
+Executing query 26
+26-th query finished in 14.971100807189941, with planning_time 0.419 ms and execution_time 14969.879 ms
+Executing query 27
+27-th query finished in 20.92255711555481, with planning_time 0.409 ms and execution_time 20921.378 ms
+Executing query 28
+28-th query finished in 18.243587732315063, with planning_time 0.413 ms and execution_time 18242.401 ms
+Executing query 29
+29-th query finished in 45.92522120475769, with planning_time 0.402 ms and execution_time 45924.085 ms
+Executing query 30
+30-th query finished in 2.1977856159210205, with planning_time 0.466 ms and execution_time 2196.573 ms
+Executing query 31
+31-th query finished in 1.6896355152130127, with planning_time 0.419 ms and execution_time 1688.467 ms
+Executing query 32
+32-th query finished in 17.279523849487305, with planning_time 0.399 ms and execution_time 17278.394 ms
+Executing query 33
+33-th query finished in 5.420905351638794, with planning_time 0.796 ms and execution_time 5419.21 ms
+Executing query 34
+34-th query finished in 4.1064558029174805, with planning_time 0.767 ms and execution_time 4104.84 ms
+Executing query 35
+35-th query finished in 6.834738731384277, with planning_time 0.756 ms and execution_time 6833.068 ms
+Executing query 36
+36-th query finished in 8.285642385482788, with planning_time 0.776 ms and execution_time 8283.918 ms
+Executing query 37
+37-th query finished in 5.837198495864868, with planning_time 0.782 ms and execution_time 5835.545 ms
+Executing query 38
+38-th query finished in 9.663960456848145, with planning_time 0.878 ms and execution_time 9662.224 ms
+Executing query 39
+39-th query finished in 8.01217794418335, with planning_time 0.88 ms and execution_time 8010.35 ms
+Executing query 40
+40-th query finished in 169.11006879806519, with planning_time 0.767 ms and execution_time 169108.469 ms
+Executing query 41
+41-th query finished in 72.49471354484558, with planning_time 0.779 ms and execution_time 72493.072 ms
+Executing query 42
+42-th query finished in 204.48262476921082, with planning_time 0.77 ms and execution_time 204481.01 ms
+Executing query 43
+43-th query finished in 18.376791954040527, with planning_time 0.753 ms and execution_time 18375.187 ms
+Executing query 44
+44-th query finished in 16.851801872253418, with planning_time 0.761 ms and execution_time 16850.174 ms
+Executing query 45
+45-th query finished in 25.449201583862305, with planning_time 0.757 ms and execution_time 25447.569 ms
+Executing query 46
+46-th query finished in 35.93870997428894, with planning_time 0.75 ms and execution_time 35937.085 ms
+Executing query 47
+47-th query finished in 28.881191730499268, with planning_time 0.774 ms and execution_time 28879.501 ms
+Executing query 48
+48-th query finished in 75.94599318504333, with planning_time 0.749 ms and execution_time 75944.37 ms
+Executing query 49
+49-th query finished in 55.28943157196045, with planning_time 0.879 ms and execution_time 55287.693 ms
+Executing query 50
+50-th query finished in 74.3560516834259, with planning_time 0.432 ms and execution_time 74354.819 ms
+Executing query 51
+51-th query finished in 52.902013301849365, with planning_time 0.467 ms and execution_time 52900.76 ms
+Executing query 52
+52-th query finished in 7.122648000717163, with planning_time 0.817 ms and execution_time 7120.989 ms
+Executing query 53
+53-th query finished in 6.966518402099609, with planning_time 0.787 ms and execution_time 6964.841 ms
+Executing query 54
+54-th query finished in 7.153425216674805, with planning_time 0.787 ms and execution_time 7151.747 ms
+Executing query 55
+55-th query finished in 11.621575117111206, with planning_time 1.461 ms and execution_time 11619.122 ms
+Executing query 56
+56-th query finished in 10.109752893447876, with planning_time 1.463 ms and execution_time 10107.301 ms
+Executing query 57
+57-th query finished in 456.07643842697144, with planning_time 1.443 ms and execution_time 456035.056 ms
+Executing query 58
+58-th query finished in 14.950433254241943, with planning_time 1.553 ms and execution_time 14947.89 ms
+Executing query 59
+59-th query finished in 2957.7080335617065, with planning_time 1.479 ms and execution_time 2957704.059 ms
+Executing query 60
+60-th query finished in 191.09142184257507, with planning_time 1.476 ms and execution_time 191088.945 ms
+Executing query 61
+61-th query finished in 30.63572406768799, with planning_time 1.463 ms and execution_time 30633.329 ms
+Executing query 62
+62-th query finished in 53.93444275856018, with planning_time 0.761 ms and execution_time 53932.825 ms
+Executing query 63
+63-th query finished in 33.24415445327759, with planning_time 0.888 ms and execution_time 33242.431 ms
+Executing query 64
+64-th query finished in 6.824295282363892, with planning_time 0.803 ms and execution_time 6822.647 ms
+Executing query 65
+65-th query finished in 18.783680200576782, with planning_time 1.47 ms and execution_time 18781.241 ms
+Executing query 66
+66-th query finished in 15.13189435005188, with planning_time 1.47 ms and execution_time 15129.397 ms
+Executing query 67
+67-th query finished in 17.464537620544434, with planning_time 1.504 ms and execution_time 17462.08 ms
+Executing query 68
+68-th query finished in 14.783709287643433, with planning_time 1.601 ms and execution_time 14781.14 ms
+Executing query 69
+69-th query finished in 113.18903541564941, with planning_time 1.572 ms and execution_time 113186.51 ms

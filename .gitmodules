@@ -1,0 +1,16 @@
+[submodule "neurocard"]
+	path = neurocard
+	url = https://github.com/neurocard/neurocard
+	ignore = dirty
+[submodule "deepdb-public"]
+	path = deepdb-public
+	url = https://github.com/DataManagementLab/deepdb-public
+	ignore = dirty
+[submodule "learnedcardinalities"]
+	path = learnedcardinalities
+	url = https://github.com/andreaskipf/learnedcardinalities
+	ignore = dirty
+[submodule "NNGP-src"]
+	path = NNGP-src
+	url = https://github.com/Kangfei/NNGP-src.git
+	ignore = dirty

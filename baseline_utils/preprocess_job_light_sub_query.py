@@ -1,6 +1,5 @@
 ''' 
 https://github.com/jt-zhang/CardinalityEstimationTestbed
-preprocessing.py --datasets-dir ../../train-test-data/forest_power-data-sql/ --raw-query-file ../../train-test-data/forest_power-data-sql/powertrain.sql --min-max-file ../data/power_min_max_vals.csv --table power --alias power
 '''
 import os
 import pickle
@@ -15,8 +14,8 @@ def preprocess_sql(sql_path):
     cols = set([])
     with open(sql_path, 'r') as f:
         for line in f.readlines():
+            sql = line.strip(';\n')
             print(line)
-            sql = line
             # cardinality = line.split(',')[-1].strip('\n')
             cardinality = '1'
             tables = [x.strip() for x in re.search('FROM(.*)WHERE', sql, re.IGNORECASE).group(1).split(',')]
@@ -139,16 +138,16 @@ if __name__ == '__main__':
     min_max_file = args.min_max_file
     sql_path = args.raw_query_file
     cols = preprocess_sql(sql_path)
-    data_dir = args.datasets_dir
-    # get_col_statistics(cols, data_dir)
-    if not os.path.exists(data_dir + '/samples.dict'):
-        samples = select_samples(data_dir)
-        with open(data_dir + '/samples.dict', 'wb') as f:
-            pickle.dump(samples, f)
-    else:
-        with open(data_dir + '/samples.dict', 'rb') as f:
-            samples = pickle.load(f)
-    sample_bitmaps = prepare_samples(sql_path, samples)
-    with open(sql_path + '.bitmap', 'wb') as f:
-        pickle.dump(sample_bitmaps, f)
-    print(sample_bitmaps[0])
+    # data_dir = args.datasets_dir
+    # # get_col_statistics(cols, data_dir)
+    # if not os.path.exists(data_dir + '/samples.dict'):
+    #     samples = select_samples(data_dir)
+    #     with open(data_dir + '/samples.dict', 'wb') as f:
+    #         pickle.dump(samples, f)
+    # else:
+    #     with open(data_dir + '/samples.dict', 'rb') as f:
+    #         samples = pickle.load(f)
+    # sample_bitmaps = prepare_samples(sql_path, samples)
+    # with open(sql_path + '.bitmap', 'wb') as f:
+    #     pickle.dump(sample_bitmaps, f)
+    # print(sample_bitmaps[0])

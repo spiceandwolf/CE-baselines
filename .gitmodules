@@ -1,16 +1,27 @@
 [submodule "neurocard"]
 	path = neurocard
-	url = https://github.com/neurocard/neurocard
-	ignore = dirty
+	url = https://github.com/spiceandwolf/neurocard.git
+	
 [submodule "deepdb-public"]
 	path = deepdb-public
-	url = https://github.com/DataManagementLab/deepdb-public
-	ignore = dirty
+	url = https://github.com/spiceandwolf/deepdb-public.git
+	
 [submodule "learnedcardinalities"]
 	path = learnedcardinalities
-	url = https://github.com/andreaskipf/learnedcardinalities
-	ignore = dirty
+	url = https://github.com/spiceandwolf/learnedcardinalities.git
+	
 [submodule "NNGP-src"]
 	path = NNGP-src
-	url = https://github.com/Kangfei/NNGP-src.git
-	ignore = dirty
+	url = https://github.com/spiceandwolf/NNGP-src.git
+	
+[submodule "FactorJoin"]
+	path = FactorJoin
+	url = https://github.com/spiceandwolf/FactorJoin.git
+	
+[submodule "FACE-A-Normalizing-Flow-based-Cardinality-Estimator"]
+	path = FACE-A-Normalizing-Flow-based-Cardinality-Estimator
+	url = https://github.com/spiceandwolf/FACE-A-Normalizing-Flow-based-Cardinality-Estimator.git
+	
+[submodule "naru"]
+	path = naru
+	url = https://github.com/spiceandwolf/naru.git

@@ -162,8 +162,5 @@ cython_debug/
 # data
 samples.zip
 samples/
-deepdb-public/
-learnedcardinalities/
-neurocard/
-NNGP-src/
-# .E2E-result/
+ce-result/dafn/
+E2E-result/*

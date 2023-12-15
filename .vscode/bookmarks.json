@@ -1,0 +1,59 @@
+{
+	"files": [
+		{
+			"path": "FactorJoin/Join_scheme/bound.py",
+			"bookmarks": [
+				{
+					"line": 102,
+					"column": 31,
+					"label": ""
+				},
+				{
+					"line": 316,
+					"column": 23,
+					"label": ""
+				},
+				{
+					"line": 334,
+					"column": 58,
+					"label": ""
+				},
+				{
+					"line": 573,
+					"column": 18,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "FactorJoin/Sampling/load_sample.py",
+			"bookmarks": [
+				{
+					"line": 18,
+					"column": 24,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "FactorJoin/Join_scheme/data_prepare.py",
+			"bookmarks": [
+				{
+					"line": 545,
+					"column": 45,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "FactorJoin/Join_scheme/binning.py",
+			"bookmarks": [
+				{
+					"line": 470,
+					"column": 23,
+					"label": ""
+				}
+			]
+		}
+	]
+}

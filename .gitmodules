@@ -1,7 +1,3 @@
-[submodule "neurocard"]
-	path = neurocard
-	url = https://github.com/spiceandwolf/neurocard.git
-	
 [submodule "deepdb-public"]
 	path = deepdb-public
 	url = https://github.com/spiceandwolf/deepdb-public.git
@@ -25,3 +21,6 @@
 [submodule "naru"]
 	path = naru
 	url = https://github.com/spiceandwolf/naru.git
+[submodule "neurocard"]
+	path = neurocard
+	url = https://github.com/spiceandwolf/neurocard.git

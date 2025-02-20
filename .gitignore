@@ -164,3 +164,6 @@ samples.zip
 samples/
 ce-result/dafn/
 E2E-result/*
+**/wandb/
+**/*.pkl
+**/*.csv

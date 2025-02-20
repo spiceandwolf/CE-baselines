@@ -28,3 +28,12 @@ compared to the baseball dataset, these datasets have some features:
 1. the join forms of these datasets include chain, star and mixed. there are 2 datasets for each join form, and one of the average pairwise correlation of the datasets is higher than the average pairwise correlation of the baseball dataset, and the another is lower.
 2. the sectors of these datasets are diverse.
 
+Experiment Records
+
+| **Dataset Name / model** | Accidents | Carcinogenesis | Consumer | Hockey | SSB | TalkingData |
+|--------------------------|-----------|----------------|----------|--------|-----|-------------|
+| PG |   |   |   |   |   |   |
+| MSCN |   |   |   |   |   |   |
+| FLAT |   |   |   |   |   |   |
+| neurocard | [ ] | [ ] | [ ] | [ ] | [x] | [ ] |
+| ASM |   |   |   |   |   |   |

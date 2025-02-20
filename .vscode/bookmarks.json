@@ -54,6 +54,16 @@
 					"label": ""
 				}
 			]
+		},
+		{
+			"path": "neurocard/neurocard/price_test_run.py",
+			"bookmarks": [
+				{
+					"line": 625,
+					"column": 45,
+					"label": "load queries from file"
+				}
+			]
 		}
 	]
 }

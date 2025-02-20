@@ -1,3 +1,5 @@
+import argparse
+import collections
 import os
 import re
 import pickle
@@ -75,3 +77,93 @@ def load_table_datas(folder_path, db, abbrev, tbls_cols_types):
                 print('load table: ', tablename, ' as ', abbrev[tablename])
                 tables[abbrev[tablename]] = table
     return tables
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_dir", help="the path of all datasets", type = str)
+    parser.add_argument("--usage", help="the kind of datasets", type = str, default =None)
+    parser.add_argument("--db", help="the dataset's name", type = str, default =None)
+    
+    args = parser.parse_args()
+    
+    dataset = join_name = args.db
+    
+    ALIAS_TO_TABLE_NAME = {}
+
+    # Columns where only equality filters make sense.
+    CATEGORICAL_COLUMNS = collections.defaultdict(list)
+
+    # Columns with a reasonable range/IN interpretation.
+    RANGE_COLUMNS = collections.defaultdict(list)
+
+    CSV_FILES = []
+    
+    TEST_DATASET_PRED_COLS = collections.defaultdict(list)
+    
+    # load abbrev: table name and alias, col_type: continuous or discrete
+    abbrev, col_type = load_abbrev_coltype(f'{args.data_dir}/statistics/{args.usage}/{args.db}/abbrev_col_type.pkl')
+    
+    # load each table's column types
+    tbls_cols_types, decimal_tbls_cols = load_tbls_cols_types(f"{args.data_dir}/datasets/{args.db}/postgres_create_{args.db}.sql")
+    
+    ALIAS_TO_TABLE_NAME = {v: k for k, v in abbrev.items()}
+    
+    join_tables = list(abbrev.keys())
+    
+    for alia, table in ALIAS_TO_TABLE_NAME.items():
+        CATEGORICAL_COLUMNS[table] = col_type[alia]['dsct']
+        RANGE_COLUMNS[table] = list(set(col_type[alia]['ctn']) - set(col_type[alia]['dsct']))
+        CSV_FILES.append(f'{table}.csv')
+        TEST_DATASET_PRED_COLS[table] = list(set(col_type[alia]['ctn']) | set(col_type[alia]['dsct']))
+        
+    joinkeys = collections.defaultdict(list)
+    join_clauses = []
+    join_table_count = []
+    join_couples = set([])
+        
+    with open(f'{args.data_dir}/statistics/{args.usage}/{args.db}/gen_fanout40.pkl', 'rb') as f:
+        fanout = pickle.load(f)
+        joins = []
+        for join in fanout.keys():
+            left, right = join[0], join[1]
+            left_table, left_column = left.split('.')[0], left.split('.')[1]
+            right_table, right_column = right.split('.')[0], right.split('.')[1]
+            left = f'{ALIAS_TO_TABLE_NAME[left_table]}.{left_column}' 
+            right = f'{ALIAS_TO_TABLE_NAME[right_table]}.{right_column}'
+            if (left, right) not in join_couples and (right, left) not in join_couples:
+                join_couples.add((left, right))
+            joins.append(left)
+            joins.append(right)
+            join_table_count.append(join[0].split('.')[0])
+            join_table_count.append(join[1].split('.')[0])
+            
+        for join in join_couples:
+            join_clauses.append(f'{join[0]}={join[1]}')
+        
+        for join in set(joins):
+            table, col = join.split('.')
+            joinkeys[table].append(col)
+            
+    count = collections.Counter(join_table_count)
+    join_root = ALIAS_TO_TABLE_NAME[count.most_common(1)[0][0]]
+    
+    output_file = f"/home/user/oblab/CE-baselines/test_dataset_training/neurocard/{args.db}/experiment_config.pkl"
+    experiment_config = {
+        'dataset': dataset,
+        'join_tables': join_tables,
+        'tbls_cols_types': tbls_cols_types,
+        'join_keys': joinkeys,
+        'join_clauses': join_clauses,
+        'join_root': join_root,
+        'ALIAS_TO_TABLE_NAME': ALIAS_TO_TABLE_NAME,
+        'CATEGORICAL_COLUMNS': CATEGORICAL_COLUMNS,
+        'RANGE_COLUMNS': RANGE_COLUMNS,
+        'CSV_FILES': CSV_FILES,
+        'TEST_DATASET_PRED_COLS': TEST_DATASET_PRED_COLS,
+    }
+    print('experiment_config:', experiment_config)
+    print('output file path:', output_file)
+    if not os.path.exists(os.path.dirname(output_file)):
+        os.makedirs(os.path.dirname(output_file))
+    with open(output_file, 'wb') as f:
+        pickle.dump(experiment_config, f)

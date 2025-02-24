@@ -35,5 +35,5 @@ Experiment Records
 | PG |   |   |   |   |   |   |
 | MSCN |   |   |   |   |   |   |
 | FLAT |   |   |   |   |   |   |
-| neurocard | [ ] | [ ] | [ ] | [ ] | [x] | [ ] |
+| neurocard | [ ] | [ ] | [ ] | [ ] | [X] | [ ] |
 | ASM |   |   |   |   |   |   |

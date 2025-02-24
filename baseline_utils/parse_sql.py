@@ -30,14 +30,15 @@ def parse_sql_2_feature_csv(sql_file_path, dataset, delimiter='#'):
             filter_types = (sqlglot.exp.EQ, sqlglot.exp.LTE, sqlglot.exp.LT, sqlglot.exp.GTE, sqlglot.exp.GT)
             parsed_sql = sqlglot.parse_one(sql)
 
-            
-            for filter in parsed_sql.args["where"].find_all(filter_types):
+            # print(f'sql: {sql} filters: {list(parsed_sql.args["where"].find_all(filter_types))}')
+            filters = list(parsed_sql.args["where"].find_all(filter_types))
+            for filter in filters[::-1]:
                 if isinstance(filter.args["expression"], sqlglot.exp.Column):  # pass join type EQ
                     continue
                 
                 if isinstance(filter, filter_types[0]) :  # EQ
                     predicate_table, predicate_col = str(filter.this).split(".")
-                    table_filter_exps.extend([f"{ref_to_tables[predicate_table]}.{left_join_col}", '=', str(filter.args["expression"])])
+                    table_filter_exps.extend([f"{ref_to_tables[predicate_table]}.{predicate_col}", '=', str(filter.args["expression"])])
                 elif isinstance(filter, filter_types[1]):  # LTE
                     predicate_table, predicate_col = str(filter.this).split(".")
                     table_filter_exps.extend([f"{ref_to_tables[predicate_table]}.{predicate_col}", '<=', str(filter.args["expression"])])

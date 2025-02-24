@@ -64,6 +64,16 @@
 					"label": "load queries from file"
 				}
 			]
+		},
+		{
+			"path": "neurocard/neurocard/estimators.py",
+			"bookmarks": [
+				{
+					"line": 238,
+					"column": 7,
+					"label": ""
+				}
+			]
 		}
 	]
 }

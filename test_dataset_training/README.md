@@ -32,8 +32,8 @@ Experiment Records
 
 | **Dataset Name / model** | Accidents | Carcinogenesis | Consumer | Hockey | SSB | TalkingData |
 |--------------------------|-----------|----------------|----------|--------|-----|-------------|
-| PG |   |   |   |   |   |   |
+| PG | [X] | [X] | [X] | [X] | [X] | [X] |
 | MSCN |   |   |   |   |   |   |
 | FLAT |   |   |   |   |   |   |
-| neurocard | [ ] | [ ] | [ ] | [ ] | [X] | [ ] |
+| neurocard | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | ASM |   |   |   |   |   |   |

@@ -167,3 +167,4 @@ E2E-result/*
 **/wandb/
 **/*.pkl
 **/*.csv
+**/*.bitmaps

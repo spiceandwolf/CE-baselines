@@ -2,13 +2,13 @@ import csv
 import sqlglot
 
 
-def parse_sql_2_feature_csv(sql_file_path, dataset, delimiter='#'):
+def parse_sql_2_feature_csv(sql_file_path, dataset, method, delimiter='#', sqls_name='workloads_3000'):
     '''
     Parse the query into its SQL components.
-    
+    used for neurocard,
     '''
     parsed_sqls = []
-    with open(f'{sql_file_path}/{dataset}/workloads_3000.sql', 'r') as f:
+    with open(f'{sql_file_path}/{dataset}/{sqls_name}.sql', 'r') as f:
         lines = f.readlines()
         for line in lines:
             spilt_infos = line.split("||")
@@ -52,19 +52,70 @@ def parse_sql_2_feature_csv(sql_file_path, dataset, delimiter='#'):
                     predicate_table, predicate_col = str(filter.this).split(".")
                     table_filter_exps.extend([f"{ref_to_tables[predicate_table]}.{predicate_col}", '>', str(filter.args["expression"])])
                     
-            # parsed_sql = ','.join([str(table) for table in tables]) + delimiter + \
-            #     ','.join([str(join) for join in table_join_exps]) + delimiter + \
-            #     ','.join([str(item) for item in table_filter_exps]) + delimiter + true_card
             parsed_sql = [','.join([str(table) for table in tables]), 
                  ','.join([str(join) for join in table_join_exps]),
                  ','.join([str(item) for item in table_filter_exps]),
                  true_card]
             parsed_sqls.append(parsed_sql)
     
-    with open(f'/home/user/oblab/CE-baselines/test_dataset_training/neurocard/{dataset}/workloads_3000.csv', 'w') as f:
+    with open(f'/home/user/oblab/CE-baselines/test_dataset_training/{method}/{dataset}/{sqls_name}.csv', 'w') as f:
         writer = csv.writer(f, delimiter=delimiter, quoting=csv.QUOTE_NONE, escapechar='\\')
         for parsed_sql in parsed_sqls:
             writer.writerow(parsed_sql)    
+            
+def parse_sql_2_feature_csv_2(sql_file_path, dataset, method, delimiter='#', sqls_name='workloads', n_queries=10000):
+    '''
+    Parse the query into its SQL components.
+    used for mscn,
+    '''
+    parsed_sqls = []
+    with open(f'{sql_file_path}/{dataset}/{sqls_name}.sql', 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            spilt_infos = line.split("||")
+            sql, true_card, pg_est_card = spilt_infos[0], spilt_infos[1], spilt_infos[2]
+            columns, tables, joins, ref_to_tables = parse_sql(lower_except_quotes(sql))
+            
+            tables = [ref_to_tables[table] for table in tables]
+            
+            table_join_exps, table_filter_exps = [], []
+
+            for join in joins:
+                left_join, right_join = join.split("=")[0].strip(), join.split("=")[1].strip()
+                if left_join in columns and right_join in columns:
+                    join = f"{left_join}={right_join}"
+                    table_join_exps.append(join)
+                    
+            filter_types = (sqlglot.exp.EQ, sqlglot.exp.LTE, sqlglot.exp.LT, sqlglot.exp.GTE, sqlglot.exp.GT)
+            parsed_sql = sqlglot.parse_one(sql)
+
+            # print(f'sql: {sql} filters: {list(parsed_sql.args["where"].find_all(filter_types))}')
+            filters = list(parsed_sql.args["where"].find_all(filter_types))
+            for filter in filters[::-1]:
+                if isinstance(filter.args["expression"], sqlglot.exp.Column):  # pass join type EQ
+                    continue
+                
+                if isinstance(filter, filter_types[0]) :  # EQ
+                    table_filter_exps.extend([f"{str(filter.this)}", '=', str(filter.args["expression"])])
+                elif isinstance(filter, filter_types[1]):  # LTE
+                    table_filter_exps.extend([f"{str(filter.this)}", '<=', str(filter.args["expression"])])
+                elif isinstance(filter, filter_types[2]):  # LT
+                    table_filter_exps.extend([f"{str(filter.this)}", '<', str(filter.args["expression"])])
+                elif isinstance(filter, filter_types[3]):  # GTE
+                    table_filter_exps.extend([f"{str(filter.this)}", '>=', str(filter.args["expression"])])
+                elif isinstance(filter, filter_types[4]):  # GT
+                    table_filter_exps.extend([f"{str(filter.this)}", '>', str(filter.args["expression"])])
+                    
+            parsed_sql = [','.join([str(f'{v} {k}') for k, v in ref_to_tables.items()]), 
+                 ','.join([str(join) for join in table_join_exps]),
+                 ','.join([str(item) for item in table_filter_exps]),
+                 true_card]
+            parsed_sqls.append(parsed_sql)
+    sqls_name = 'train'
+    with open(f'/home/user/oblab/CE-baselines/test_dataset_training/{method}/{dataset}/{sqls_name}.csv', 'w') as f:
+        writer = csv.writer(f, delimiter=delimiter, quoting=csv.QUOTE_NONE, escapechar='\\')
+        for parsed_sql in parsed_sqls:
+            writer.writerow(parsed_sql)   
     
 def lower_except_quotes(s):
     inside_quote = False
@@ -114,4 +165,5 @@ def parse_sql(sql):
         return columns, tables, joins, ref_to_tables
     
 if __name__ == "__main__":
-    parse_sql_2_feature_csv('/home/user/oblab/PRICE/datas/workloads/pretrain', 'ssb')
+    # parse_sql_2_feature_csv('/home/user/oblab/PRICE/datas/workloads/pretrain', 'ssb', 'neurocard')
+    parse_sql_2_feature_csv_2('/home/user/oblab/PRICE/datas/workloads/pretrain', 'ssb', 'mscn', sqls_name='workloads')

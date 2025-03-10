@@ -212,7 +212,7 @@ def main():
         predicates = convert_preds(predicates, rev_alias_dict)
 
     
-    output_path = f'{args.output}/{args.db}/{args.db}.bitmaps'
+    output_path = f'{args.output}/{args.db}/train.bitmaps'
     
     if not os.path.exists(os.path.dirname(output_path)):
         os.makedirs(os.path.dirname(output_path))

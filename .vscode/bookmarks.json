@@ -59,7 +59,7 @@
 			"path": "neurocard/neurocard/price_test_run.py",
 			"bookmarks": [
 				{
-					"line": 625,
+					"line": 626,
 					"column": 45,
 					"label": "load queries from file"
 				}
@@ -71,6 +71,11 @@
 				{
 					"line": 238,
 					"column": 7,
+					"label": ""
+				},
+				{
+					"line": 862,
+					"column": 9,
 					"label": ""
 				}
 			]

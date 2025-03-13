@@ -165,5 +165,5 @@ def parse_sql(sql):
         return columns, tables, joins, ref_to_tables
     
 if __name__ == "__main__":
-    # parse_sql_2_feature_csv('/home/user/oblab/PRICE/datas/workloads/pretrain', 'ssb', 'neurocard')
-    parse_sql_2_feature_csv_2('/home/user/oblab/PRICE/datas/workloads/pretrain', 'ssb', 'mscn', sqls_name='workloads')
+    parse_sql_2_feature_csv('/home/user/oblab/CE-baselines/test_dataset_training/mscn', 'ssb', 'neurocard', sqls_name='workloads')
+    # parse_sql_2_feature_csv_2('/home/user/oblab/PRICE/datas/workloads/pretrain', 'ssb', 'mscn', sqls_name='workloads')

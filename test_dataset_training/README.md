@@ -37,3 +37,7 @@ Experiment Records
 | FLAT |   |   |   |   |   |   |
 | neurocard | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | ASM |   |   |   |   |   |   |
+
+qerror:
+    SSB:
+        neurocard: 'max': 12.0, 'p99': 4.264999999999986, 'p95': 2.0, 'median': 1.0589522461063199

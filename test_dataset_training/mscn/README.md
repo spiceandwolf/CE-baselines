@@ -19,4 +19,8 @@ baseline_utils/prepare_col_info.py is used to generate the **column_min_max_vals
     ```
 
 ## Usage
-```python3 price_test_train.py --epochs 100 <dataset>```
+    ```
+    python3 price_test_train.py --num_queries 50000 --train_queries <train_queries> --test_queries <test_queries> --cuda <dataset>
+    
+    python3 price_test_train.py --num_queries 50000 --train_queries /home/user/oblab/PRICE/datas/workloads/pretrain --test_queries /home/user/oblab/CE-baselines/test_dataset_training/mscn --cuda <dataset>
+    ```

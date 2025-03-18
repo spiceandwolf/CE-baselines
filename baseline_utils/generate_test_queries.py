@@ -213,7 +213,7 @@ def MakeQueries(cursor, num_queries, alias2table, subgraph, join_keys, col_type,
             .format(true_card, dur))
 
     df = pd.DataFrame({
-        'tables': [','.join(tables_in_subgraph)] * len(true_cards),
+        'tables': [','.join(join_tables)] * len(true_cards),
         'join_conds': [
             ','.join(join_clauses_list)
         ] * len(true_cards),

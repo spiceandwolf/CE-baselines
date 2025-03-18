@@ -55,11 +55,13 @@ def get_query_pred(col_type, c, o, v):
             v = int(v)
         pred = f"{c} {o} {v} and {c}.notnull() "
     elif o in ['>=','>','=','<','<='] :
+        # print(f'col_type: {col_type}')
         if o == '=' :
             o = '=='
         if col_type =='str' or col_type == 'date':
             v = f""" "{v}" """
-        elif col_type == 'int':
+        elif col_type == 'int' or col_type == 'Int64':
+            v = v.replace("'", "")
             v = int(v)
         pred = f"{c} {o} {v}"
     else : assert False
@@ -72,9 +74,9 @@ def filtered_indices(table, predicates, table_name, dtype_dict) :
         return df
     pred_list = list()
     for c, o, v in predicates :
-        # print(f'table_name: {table_name}, column: {c}')
         col_type = dtype_dict[table_name][c]
         pred = get_query_pred(col_type, c, o, v)
+        # print(f'table_name: {table_name}, column: {c} , operator: {o}, value: {v}')
         pred_list.append(pred)
     pred = ' and '.join(pred_list)
     # print(pred)
@@ -212,7 +214,7 @@ def main():
         predicates = convert_preds(predicates, rev_alias_dict)
 
     
-    output_path = f'{args.output}/{args.db}/train.bitmaps'
+    output_path = f'{args.output}/{args.db}/{os.path.splitext(os.path.basename(input_path))[0]}.bitmaps'
     
     if not os.path.exists(os.path.dirname(output_path)):
         os.makedirs(os.path.dirname(output_path))

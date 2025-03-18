@@ -107,11 +107,11 @@ def parse_sql_2_feature_csv_2(sql_file_path, dataset, method, delimiter='#', sql
                     table_filter_exps.extend([f"{str(filter.this)}", '>', str(filter.args["expression"])])
                     
             parsed_sql = [','.join([str(f'{v} {k}') for k, v in ref_to_tables.items()]), 
-                 ','.join([str(join) for join in table_join_exps]),
-                 ','.join([str(item) for item in table_filter_exps]),
+                 ','.join([(join) for join in table_join_exps]),
+                 ','.join([(item) for item in table_filter_exps]),
                  true_card]
             parsed_sqls.append(parsed_sql)
-    sqls_name = 'train'
+    # sqls_name = 'train'
     with open(f'/home/user/oblab/CE-baselines/test_dataset_training/{method}/{dataset}/{sqls_name}.csv', 'w') as f:
         writer = csv.writer(f, delimiter=delimiter, quoting=csv.QUOTE_NONE, escapechar='\\')
         for parsed_sql in parsed_sqls:
@@ -165,5 +165,5 @@ def parse_sql(sql):
         return columns, tables, joins, ref_to_tables
     
 if __name__ == "__main__":
-    parse_sql_2_feature_csv('/home/user/oblab/CE-baselines/test_dataset_training/mscn', 'ssb', 'neurocard', sqls_name='workloads')
-    # parse_sql_2_feature_csv_2('/home/user/oblab/PRICE/datas/workloads/pretrain', 'ssb', 'mscn', sqls_name='workloads')
+    # parse_sql_2_feature_csv('/home/user/oblab/CE-baselines/test_dataset_training/mscn', 'ssb', 'neurocard', sqls_name='workloads')
+    parse_sql_2_feature_csv_2('/home/user/oblab/CE-baselines/test_dataset_training/mscn', 'ssb', 'mscn', sqls_name='workloads')

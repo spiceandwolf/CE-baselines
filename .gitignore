@@ -168,3 +168,4 @@ E2E-result/*
 **/*.pkl
 **/*.csv
 **/*.bitmaps
+test_dataset_training/**/*.png

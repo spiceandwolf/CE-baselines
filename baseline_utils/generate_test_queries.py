@@ -37,9 +37,9 @@ def make_join_graph(join_clauses, root):
         clauses.append(groups)
     g = nx.Graph()
     for t1, c1, t2, c2 in clauses:
-        assert not g.has_edge(t1, t2)
+        # assert not g.has_edge(t1, t2)
         g.add_edge(t1, t2, join_keys={t1: c1, t2: c2})
-    assert nx.is_tree(g), g.edges
+    # assert nx.is_tree(g), g.edges
 
     # paths = nx.single_source_shortest_path(g, root)
     # dg = nx.DiGraph()
@@ -92,11 +92,13 @@ def generate_connected_subgraphs_up_to_k(G, max_k):
                 visited.add(new_nodes)
                 queue.append(new_nodes)
                 if 2 <= len(new_nodes) <= max_k:
-                    result.append(G.subgraph(new_nodes))
+                    subtree = G.subgraph(new_nodes)
+                    if nx.is_tree(subtree):
+                        result.append(subtree)
     
     return result
 
-def MakeQueries(cursor, num_queries, alias2table, subgraph, join_keys, col_type, tables, max_filters, rng):
+def MakeQueries(cursor, num_queries, alias2table, subgraph, col_type, tables, max_filters, rng):
     """
     Sample a tuple from actual join result then place filters.
     
@@ -107,22 +109,33 @@ def MakeQueries(cursor, num_queries, alias2table, subgraph, join_keys, col_type,
     # TODO: this assumes single equiv class.
     join_clauses_list = []
     first_tab = join_edges[0][0]
-    join_spec = tables[first_tab]
+    join_spec = tables[first_tab].rename(columns=lambda x: f"{first_tab}.{x}")
+    join_spec = join_spec.sample(n=min(50000, len(join_spec)))
+    print(f"join_spec.columns {join_spec.columns.tolist()}")
     dfs_edges = list(nx.dfs_edges(subgraph, first_tab))
+    join_keys = collections.defaultdict(set)
     for join_edge in dfs_edges:
         joinkeys = subgraph.edges[join_edge]['join_keys']
         tabs, cols = list(joinkeys.keys()), list(joinkeys.values())
+        for tab, col in joinkeys.items():
+            join_keys[tab].add(col)
         print(f'join tabs: {tabs}, cols: {cols}')
-        if cols[0] in join_spec.columns:
-            join_spec = pd.merge(join_spec, tables[tabs[1]], left_on=cols[0], right_on=cols[1])
+        if f"{tabs[0]}.{cols[0]}" in join_spec.columns:
+            right_table = tables[tabs[1]].rename(columns=lambda x: f"{tabs[1]}.{x}")
+            right_table = right_table.sample(n=min(50000, len(right_table)))
+            print(f"right_table.columns {right_table.columns.tolist()}")
+            join_spec = pd.merge(join_spec, right_table, left_on=f"{tabs[0]}.{cols[0]}", right_on=f"{tabs[1]}.{cols[1]}")
         else:
-            join_spec = pd.merge(tables[tabs[0]], join_spec, left_on=cols[0], right_on=cols[1])
+            left_table = tables[tabs[0]].rename(columns=lambda x: f"{tabs[0]}.{x}")
+            left_table = left_table.sample(n=min(50000, len(left_table)))
+            print(f"left_table.columns {left_table.columns.tolist()}")
+            join_spec = pd.merge(left_table, join_spec, left_on=f"{tabs[0]}.{cols[0]}", right_on=f"{tabs[1]}.{cols[1]}")
         join_clauses_list.append(f"{tabs[0]}.{cols[0]}={tabs[1]}.{cols[1]}")
         
     print(f"join_spec.columns {join_spec.columns.tolist()}")    
     
     # Build a concat table representing the join result schema.
-    join_keys_list = [f"{alia}.{c}" for alia in tables_in_subgraph for c in join_keys[alias2table[alia]]]
+    join_keys_list = [f"{alia}.{c}" for alia in tables_in_subgraph for c in join_keys[alia]]
     print('join_keys_list', join_keys_list)
     
     # Take only the content columns. Don't take the join keys.
@@ -147,37 +160,50 @@ def MakeQueries(cursor, num_queries, alias2table, subgraph, join_keys, col_type,
     # Obtain the statistical information required for generating queries based on the preprocessing results of PRICE in the dataset for content_cols.
     print('content_cols', content_cols)
     ncols = len(content_cols)
+    
     queries = []
     filter_strings = []
     sql_queries = []  # To get true cardinalities.
-    sampled_df = join_spec.sample(num_queries)
-
-    for i in range(num_queries):
+    n_queries = min(num_queries, len(join_spec))
+    
+    sampled_df = join_spec.sample(n_queries)
+    print(f'to generate {n_queries} queries')
+    
+    for i in range(n_queries):
+        filter_clauses = []
         
-        num_filters = rng.randint(1, max_filters + 1 if ncols > max_filters + 1 else ncols)
+        if ncols != 0:
+        
+            num_filters = rng.randint(0, max_filters + 1 if ncols > max_filters + 1 else ncols)
 
-        table_cols = rng.choice(content_cols, num_filters, replace=False).tolist()
-        cols = [c.split('.')[1] for c in table_cols]
-        vals = sampled_df.iloc[i][cols].tolist()
+            table_cols = rng.choice(content_cols, num_filters, replace=False).tolist()
+            # cols = [c.split('.')[1] for c in table_cols]
+            vals = sampled_df.iloc[i][table_cols]
+            non_null_indices = np.argwhere(~pd.isnull(vals).values).reshape(-1,)
+            if len(non_null_indices) < num_filters:
+                continue
+            table_cols = [table_cols[i] for i in non_null_indices]
+            vals = vals.iloc[non_null_indices].tolist()
 
-        # Place {'<=', '>=', '='} on numericals and '=' on categoricals.
-        ops = rng.choice(['<=', '>=', '='], size=len(table_cols))
-        sensible_to_do_range = [c in numericals for c in table_cols]
-        ops = np.where(sensible_to_do_range, ops, '=')
+            # Place {'<=', '>=', '='} on numericals and '=' on categoricals.
+            ops = rng.choice(['<=', '>=', '='], size=len(table_cols))
+            sensible_to_do_range = [c in numericals for c in table_cols]
+            ops = np.where(sensible_to_do_range, ops, '=')
 
-        print('cols', table_cols, 'ops', ops, 'vals', vals)
+            print('cols', table_cols, 'ops', ops, 'vals', vals)
 
-        queries.append((table_cols, ops, vals))
-        filter_strings.append(','.join(
-            [','.join((c, o, str(v))) for c, o, v in zip(table_cols, ops, vals)]))
+            queries.append((table_cols, ops, vals))
+            
+            filter_strings.append(','.join(
+                [','.join((c, o, str(v))) for c, o, v in zip(table_cols, ops, vals)]))
 
-        # Quote string literals & leave other literals alone.
-        filter_clauses = [
-            '{} {} {}'.format(col, op, val)
-            if table_cols in numericals else
-            '{} {} \'{}\''.format(col, op, val)
-            for col, op, val in zip(table_cols, ops, vals)
-        ]
+            # Quote string literals & leave other literals alone.
+            filter_clauses = [
+                '{} {} {}'.format(col, op, val)
+                if table_cols in numericals else
+                '{} {} \'{}\''.format(col, op, val)
+                for col, op, val in zip(table_cols, ops, vals)
+            ]
         
         join_tables = ', '.join([f"{alias2table[alia]} {alia}" for alia in tables_in_subgraph])
         clauses = ' AND '.join([join_cond for join_cond in join_clauses_list] + [filter_clause for filter_clause in filter_clauses])
@@ -185,7 +211,11 @@ def MakeQueries(cursor, num_queries, alias2table, subgraph, join_keys, col_type,
         sql = f"SELECT COUNT(*) FROM {join_tables} WHERE {clauses};"
         sql_queries.append(sql)
 
-        if len(queries) >= num_queries:
+        if len(queries) >= n_queries:
+            break
+        
+        if ncols == 0:
+            filter_strings.append("")
             break
 
     true_cards = []
@@ -213,7 +243,7 @@ def MakeQueries(cursor, num_queries, alias2table, subgraph, join_keys, col_type,
             .format(true_card, dur))
 
     df = pd.DataFrame({
-        'tables': [','.join(join_tables)] * len(true_cards),
+        'tables': [','.join([f"{alias2table[alia]} {alia}" for alia in tables_in_subgraph])] * len(true_cards),
         'join_conds': [
             ','.join(join_clauses_list)
         ] * len(true_cards),
@@ -286,19 +316,37 @@ if __name__ == '__main__':
     
     conn = psycopg2.connect(database=args.db, user="postgres", password="postgres", host="localhost", port=5433,)
     cursor = conn.cursor()
-    cursor.execute("SET max_parallel_workers_per_gather = 24;")
+    cursor.execute("SET max_parallel_workers_per_gather = 12;")
     
     num_queries = args.num_queries // len(subgraphs)
+    chosen_subgraphs = subgraphs
+    if len(subgraphs) >= args.num_queries:
+        chosen_subgraphs = subgraphs[-args.num_queries // 2:]
+        num_queries = args.num_queries // len(chosen_subgraphs)
     
+    rest_n_queries = args.num_queries 
     
-    for subgraph in subgraphs:
-        if len(subgraph.nodes) < 3:
-            continue
-        df, sqls = MakeQueries(cursor, num_queries, alias2table, subgraph, joinkeys, col_type, tables, args.max_filters, rng)
-        with open(f'{args.output}.csv', 'a') as f:
+    for subgraph in chosen_subgraphs:
+        # if len(subgraph.nodes) < 2:
+        #     continue
+        df, sqls = MakeQueries(cursor, num_queries, alias2table, subgraph, col_type, tables, args.max_filters, rng)
+        with open(f'{args.output}/workloads.csv', 'a') as f:
             df.to_csv(f, sep='#', index=False, header=False)
-        with open(f'{args.output}.sql', 'a') as f:
+        with open(f'{args.output}/workloads.sql', 'a') as f:
             for sql, true_card, dur in sqls:
                 f.write(f"{sql}||{true_card}||||{dur}\n")
         print('Template done.')
+        rest_n_queries -= len(df)
     
+    rest_subgraphs = subgraphs[:-args.num_queries // 2]
+    while rest_n_queries > 0.25 * args.num_queries and len(rest_subgraphs) > 0:
+        subgraph = rest_subgraphs[-1]
+        df, sqls = MakeQueries(cursor, num_queries, alias2table, subgraph, col_type, tables, args.max_filters, rng)
+        with open(f'{args.output}/workloads.csv', 'a') as f:
+            df.to_csv(f, sep='#', index=False, header=False)
+        with open(f'{args.output}/workloads.sql', 'a') as f:
+            for sql, true_card, dur in sqls:
+                f.write(f"{sql}||{true_card}||||{dur}\n")
+        print('Template done.')
+        rest_n_queries -= len(df)
+        rest_subgraphs = rest_subgraphs[:-1]

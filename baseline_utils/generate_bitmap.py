@@ -5,6 +5,7 @@ https://github.com/andreaskipf/learnedcardinalities/issues/1#issuecomment-528733
 '''
 import argparse
 import csv
+from decimal import Decimal
 import os
 from numpy.core.fromnumeric import mean
 import pandas as pd
@@ -63,18 +64,27 @@ def get_query_pred(col_type, c, o, v):
         elif col_type == 'int' or col_type == 'Int64':
             v = v.replace("'", "")
             v = int(v)
+        elif col_type == 'float' or col_type == 'Float64':
+            v = v.replace("'", "")
+            v = float(v)
+        elif col_type == 'decimal':
+            v = v.replace("'", "")
+            v = Decimal(v)
         pred = f"{c} {o} {v}"
     else : assert False
     return pred
 
 
-def filtered_indices(table, predicates, table_name, dtype_dict) :
+def filtered_indices(table, predicates, table_name, dtype_dict, decimal_tbls_cols) :
     df = table[:NUM_MATERIALIZED_SAMPLES]
     if len(predicates) == 0:
         return df
     pred_list = list()
     for c, o, v in predicates :
-        col_type = dtype_dict[table_name][c]
+        if c in dtype_dict[table_name].keys():
+            col_type = dtype_dict[table_name][c]
+        elif c in decimal_tbls_cols[table_name]:
+            col_type = 'decimal'
         pred = get_query_pred(col_type, c, o, v)
         # print(f'table_name: {table_name}, column: {c} , operator: {o}, value: {v}')
         pred_list.append(pred)
@@ -132,7 +142,7 @@ def convert_pred(pred, alias_dict):
     return new_pred
 
 
-def write_bitmap(table_to_df, dtype_dict, tables, predicates, output_path):
+def write_bitmap(table_to_df, dtype_dict, decimal_tbls_cols, tables, predicates, output_path):
     with open(output_path, 'wb') as outfile:
         num_queries = len(tables)
 
@@ -164,7 +174,7 @@ def write_bitmap(table_to_df, dtype_dict, tables, predicates, output_path):
                     alias = query_table.split(" ")[1]
 
                     if alias in table_to_predicates :
-                        filtered = filtered_indices(table_to_df[table], table_to_predicates[alias], table, dtype_dict)
+                        filtered = filtered_indices(table_to_df[table], table_to_predicates[alias], table, dtype_dict, decimal_tbls_cols)
                         bitmap = np.zeros(NUM_MATERIALIZED_SAMPLES, dtype=bool)
                         bitmap[filtered] = 1
                     else:
@@ -195,7 +205,7 @@ def main():
     abbrev, col_type = load_abbrev_coltype(f'{args.data_path}/statistics/{args.usage}/{args.db}/abbrev_col_type.pkl')
     
     # load each table's column types
-    dtype_dict, _ = load_tbls_cols_types(f"{args.data_path}/datasets/{args.db}/postgres_create_{args.db}.sql")
+    dtype_dict, decimal_tbls_cols = load_tbls_cols_types(f"{args.data_path}/datasets/{args.db}/postgres_create_{args.db}.sql")
     
     alias_dict = {v : k for k, v in abbrev.items()}
     
@@ -219,7 +229,7 @@ def main():
     if not os.path.exists(os.path.dirname(output_path)):
         os.makedirs(os.path.dirname(output_path))
     
-    write_bitmap(tables_to_df, dtype_dict, tables, predicates, output_path)
+    write_bitmap(tables_to_df, dtype_dict, decimal_tbls_cols, tables, predicates, output_path)
     
     print("finish")
 

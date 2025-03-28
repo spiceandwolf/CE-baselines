@@ -28,6 +28,10 @@ compared to the baseball dataset, these datasets have some features:
 1. the join forms of these datasets include chain, star and mixed. there are 2 datasets for each join form, and one of the average pairwise correlation of the datasets is higher than the average pairwise correlation of the baseball dataset, and the another is lower.
 2. the sectors of these datasets are diverse.
 
+Since the test workloads provided in price only include workloads for horizontal comparison baselines on four datasets, other datasets have pre-trained workloads but lack corresponding test workloads. Therefore, we need to generate these test workloads for the selected datasets ourselves. The program [*generate_test_queries.sh*], which generates query statements for these workloads, is implemented based on the pseudocode provided in price. Before using the script, determine the variables within it based on the actual usage requirements.
+
+One notable feature of the workloads provided by price is that the filter predicate operators in the pre-training SQL statements do not include the '<=' operator, which directly impacts the MSCN model. In the pre-trained workloads provided by Price, the range query predicates actually only utilize the operators '>=' and '<', which is presumably derived from the form of [x, y).
+
 Experiment Records
 
 | **Dataset Name / model** | Accidents | Carcinogenesis | Consumer | Hockey | SSB | TalkingData |
@@ -39,5 +43,12 @@ Experiment Records
 | ASM |   |   |   |   |   |   |
 
 qerror:
+    Accidents:
+        mscn: 'max': 36481.0, 'p99': 19264.893146204122, 'p95': 9923.778985507246, 'median': 65.71580046513836
+    Carcinogenesis:
+    Consumer:
+    Hockey:
     SSB:
         neurocard: 'max': 12.0, 'p99': 4.264999999999986, 'p95': 2.0, 'median': 1.0589522461063199
+        mscn: 'max': 78374.2, 'p99': 7836.54999999999, 'p95': 4781.0, 'median': 2.3505929497536844
+    TalkingData:

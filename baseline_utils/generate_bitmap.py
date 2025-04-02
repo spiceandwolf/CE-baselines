@@ -76,7 +76,7 @@ def get_query_pred(col_type, c, o, v):
 
 
 def filtered_indices(table, predicates, table_name, dtype_dict, decimal_tbls_cols) :
-    df = table[:NUM_MATERIALIZED_SAMPLES]
+    df = table[:NUM_MATERIALIZED_SAMPLES].rename(columns=lambda x: f"{table_name}_{x}")
     if len(predicates) == 0:
         return df
     pred_list = list()
@@ -85,6 +85,8 @@ def filtered_indices(table, predicates, table_name, dtype_dict, decimal_tbls_col
             col_type = dtype_dict[table_name][c]
         elif c in decimal_tbls_cols[table_name]:
             col_type = 'decimal'
+        c = f"{table_name}_{c}"
+        # print(f'c: {c}, o: {o}, v: {v}')
         pred = get_query_pred(col_type, c, o, v)
         # print(f'table_name: {table_name}, column: {c} , operator: {o}, value: {v}')
         pred_list.append(pred)

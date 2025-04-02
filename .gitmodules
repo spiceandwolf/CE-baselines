@@ -24,3 +24,6 @@
 [submodule "neurocard"]
 	path = neurocard
 	url = https://github.com/spiceandwolf/neurocard.git
+[submodule "ASM"]
+	path = ASM
+	url = https://github.com/spiceandwolf/ASM.git

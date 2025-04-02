@@ -46,7 +46,7 @@ def load_tbls_cols_types(type_file):
                 elif "character" in line or "varchar(" in line or "char(" in line: 
                     col = line.strip().split(" ")[0].replace('"', '')
                     tbls_cols_types[tbl][col] = pd.StringDtype()
-                elif "decimal(" in line:
+                elif "decimal" in line:
                     col = line.strip().split(" ")[0].replace('"', '')
                     decimal_tbls_cols[tbl].append(col)
                 elif "double precision" in line:

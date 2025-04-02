@@ -98,7 +98,7 @@ def generate_connected_subgraphs_up_to_k(G, max_k):
     
     return result
 
-def MakeQueries(cursor, num_queries, alias2table, subgraph, col_type, tables, max_filters, rng):
+def MakeQueries(cursor, num_queries, alias2table, subgraph, alljoinkeys, col_type, tables, max_filters, rng):
     """
     Sample a tuple from actual join result then place filters.
     
@@ -111,7 +111,7 @@ def MakeQueries(cursor, num_queries, alias2table, subgraph, col_type, tables, ma
     first_tab = join_edges[0][0]
     join_spec = tables[first_tab].rename(columns=lambda x: f"{first_tab}.{x}")
     join_spec = join_spec.sample(n=min(50000, len(join_spec)))
-    print(f"join_spec.columns {join_spec.columns.tolist()}")
+    # print(f"join_spec.columns {join_spec.columns.tolist()}")
     dfs_edges = list(nx.dfs_edges(subgraph, first_tab))
     join_keys = collections.defaultdict(set)
     for join_edge in dfs_edges:
@@ -119,24 +119,24 @@ def MakeQueries(cursor, num_queries, alias2table, subgraph, col_type, tables, ma
         tabs, cols = list(joinkeys.keys()), list(joinkeys.values())
         for tab, col in joinkeys.items():
             join_keys[tab].add(col)
-        print(f'join tabs: {tabs}, cols: {cols}')
+        # print(f'join tabs: {tabs}, cols: {cols}')
         if f"{tabs[0]}.{cols[0]}" in join_spec.columns:
             right_table = tables[tabs[1]].rename(columns=lambda x: f"{tabs[1]}.{x}")
-            right_table = right_table.sample(n=min(50000, len(right_table)))
-            print(f"right_table.columns {right_table.columns.tolist()}")
+            right_table = right_table.sample(n=min(50000, len(right_table))).dropna()
+            # print(f"right_table.columns {right_table.columns.tolist()}")
             join_spec = pd.merge(join_spec, right_table, left_on=f"{tabs[0]}.{cols[0]}", right_on=f"{tabs[1]}.{cols[1]}")
         else:
             left_table = tables[tabs[0]].rename(columns=lambda x: f"{tabs[0]}.{x}")
-            left_table = left_table.sample(n=min(50000, len(left_table)))
-            print(f"left_table.columns {left_table.columns.tolist()}")
+            left_table = left_table.sample(n=min(50000, len(left_table))).dropna()
+            # print(f"left_table.columns {left_table.columns.tolist()}")
             join_spec = pd.merge(left_table, join_spec, left_on=f"{tabs[0]}.{cols[0]}", right_on=f"{tabs[1]}.{cols[1]}")
         join_clauses_list.append(f"{tabs[0]}.{cols[0]}={tabs[1]}.{cols[1]}")
         
-    print(f"join_spec.columns {join_spec.columns.tolist()}")    
+    # print(f"join_spec.columns {join_spec.columns.tolist()}")    
     
     # Build a concat table representing the join result schema.
     join_keys_list = [f"{alia}.{c}" for alia in tables_in_subgraph for c in join_keys[alia]]
-    print('join_keys_list', join_keys_list)
+    # print('join_keys_list', join_keys_list)
     
     # Take only the content columns. Don't take the join keys.
     content_cols = []
@@ -161,27 +161,35 @@ def MakeQueries(cursor, num_queries, alias2table, subgraph, col_type, tables, ma
     print('content_cols', content_cols)
     ncols = len(content_cols)
     
-    queries = []
     filter_strings = []
     sql_queries = []  # To get true cardinalities.
     n_queries = min(num_queries, len(join_spec))
+    n_allways_null = 0
     
-    sampled_df = join_spec.sample(n_queries)
     print(f'to generate {n_queries} queries')
     
-    for i in range(n_queries):
+    while len(filter_strings) < n_queries:
         filter_clauses = []
         
         if ncols != 0:
-        
+            
+            sampled_df = join_spec.sample(1)
             num_filters = rng.randint(0, max_filters + 1 if ncols > max_filters + 1 else ncols)
 
-            table_cols = rng.choice(content_cols, num_filters, replace=False).tolist()
+            chosen_table_cols = rng.choice(content_cols, num_filters, replace=False).tolist()
+            table_cols = [table_col for table_col in chosen_table_cols if table_col.split(".")[1] not in alljoinkeys[alias2table[table_col.split(".")[0]]]]
             # cols = [c.split('.')[1] for c in table_cols]
-            vals = sampled_df.iloc[i][table_cols]
+            vals = sampled_df.iloc[0][table_cols]
+            
             non_null_indices = np.argwhere(~pd.isnull(vals).values).reshape(-1,)
+            
+            if n_allways_null > n_queries:
+                break
             if len(non_null_indices) < num_filters:
                 continue
+            elif len(non_null_indices) == 0:
+                n_allways_null += 1
+            
             table_cols = [table_cols[i] for i in non_null_indices]
             vals = vals.iloc[non_null_indices].tolist()
 
@@ -190,9 +198,7 @@ def MakeQueries(cursor, num_queries, alias2table, subgraph, col_type, tables, ma
             sensible_to_do_range = [c in numericals for c in table_cols]
             ops = np.where(sensible_to_do_range, ops, '=')
 
-            print('cols', table_cols, 'ops', ops, 'vals', vals)
-
-            queries.append((table_cols, ops, vals))
+            # print('cols', table_cols, 'ops', ops, 'vals', vals)
             
             filter_strings.append(','.join(
                 [','.join((c, o, str(v))) for c, o, v in zip(table_cols, ops, vals)]))
@@ -210,10 +216,10 @@ def MakeQueries(cursor, num_queries, alias2table, subgraph, col_type, tables, ma
 
         sql = f"SELECT COUNT(*) FROM {join_tables} WHERE {clauses};"
         sql_queries.append(sql)
-
-        if len(queries) >= n_queries:
-            break
         
+        filter_strings = list(dict.fromkeys(filter_strings))
+        sql_queries = list(dict.fromkeys(sql_queries))
+
         if ncols == 0:
             filter_strings.append("")
             break
@@ -329,7 +335,7 @@ if __name__ == '__main__':
     for subgraph in chosen_subgraphs:
         # if len(subgraph.nodes) < 2:
         #     continue
-        df, sqls = MakeQueries(cursor, num_queries, alias2table, subgraph, col_type, tables, args.max_filters, rng)
+        df, sqls = MakeQueries(cursor, num_queries, alias2table, subgraph, joinkeys, col_type, tables, args.max_filters, rng)
         with open(f'{args.output}/workloads.csv', 'a') as f:
             df.to_csv(f, sep='#', index=False, header=False)
         with open(f'{args.output}/workloads.sql', 'a') as f:
@@ -341,7 +347,7 @@ if __name__ == '__main__':
     rest_subgraphs = subgraphs[:-args.num_queries // 2]
     while rest_n_queries > 0.25 * args.num_queries and len(rest_subgraphs) > 0:
         subgraph = rest_subgraphs[-1]
-        df, sqls = MakeQueries(cursor, num_queries, alias2table, subgraph, col_type, tables, args.max_filters, rng)
+        df, sqls = MakeQueries(cursor, num_queries, alias2table, subgraph, joinkeys, col_type, tables, args.max_filters, rng)
         with open(f'{args.output}/workloads.csv', 'a') as f:
             df.to_csv(f, sep='#', index=False, header=False)
         with open(f'{args.output}/workloads.sql', 'a') as f:

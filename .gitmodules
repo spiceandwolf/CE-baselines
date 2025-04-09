@@ -27,3 +27,6 @@
 [submodule "ASM"]
 	path = ASM
 	url = https://github.com/spiceandwolf/ASM.git
+[submodule "QSPN_code"]
+	path = QSPN_code
+	url = https://github.com/rucjrliu/QSPN_code.git

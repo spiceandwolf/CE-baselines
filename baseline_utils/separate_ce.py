@@ -2,24 +2,42 @@ import argparse
 import pandas as pd
 
 if __name__ == '__main__':
-    '''
-    for example:
-    python separate_ce.py --method_name mscn --target_csv_path /home/hdd/user1/oblab/CE-baselines/learnedcardinalities/results/predictions_job-light.csv --card_col 0
-    '''
     
-    parser = argparse.ArgumentParser()
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('--db', type=str,)
+    arg_parser.add_argument('--workload_file', type=str,)
+    arg_parser.add_argument('--subqueries_file', type=str,)
     
-    parser.add_argument('--method_name', type=str, help='Which method to be used')
-    parser.add_argument('--target_csv_path', type=str, help='Which method\'s ce to be separated')
-    parser.add_argument('--card_col', type=int, help='Which column\'s the ce')
+    args = arg_parser.parse_args()
+    dataset_name = args.db
+    workload_file = args.workload_file 
+    subqueries_file = args.subqueries_file
     
-    args = parser.parse_args()
-    method_name = args.method_name
-    target_csv_path = args.target_csv_path
-    col = args.card_col
+    with open(subqueries_file, 'r') as f:
+        lines = f.readlines()
+        
+    with open(workload_file, 'r') as f:
+        workload_lines = f.readlines()
+        
+    full_lines = []
+        
+    i = 0
+    for line in lines:
+        sql = line.split("||")[0]
+        
+        if sql.startswith("SELECT"):
+            true_card = line.split("||")[1]
+            pg_card = line.split("||")[2]
+            
+            workload_line = workload_lines[i].strip()
+            
+            assert int(workload_line.split("||")[1]) == int(true_card)
+            
+            full_line = workload_line.split("||")[0] + "||" + true_card + "||" + pg_card + "||" + workload_line.split("||")[3]
+            full_lines.append(full_line)
+            i += 1
     
-    target_csv = pd.read_csv(target_csv_path, header=0, sep=',', usecols=[col])
-    # target_csv['query'] = target_csv['query'].apply(lambda x: x.strip('\n'))
-    
-    result_path = f'../ce-result/job_light_sub_queries_{method_name}.txt'
-    target_csv.to_csv(result_path, header=None, index=False)
+    with open(workload_file, 'w') as f:
+        for line in full_lines:
+            f.write(line)
+            f.write("\n")

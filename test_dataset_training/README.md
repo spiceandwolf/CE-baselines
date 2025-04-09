@@ -6,9 +6,11 @@ the datasets are from the paper, [PRICE: A Pretrained Model for Cross-Database
 we select the competing methods according to their theories, including namely traditional, data-driven and query-driven methods. the chosen ones are present as follows: 
 1. PG.
 2. MSCN.
-3. FLAT. factorize-split-sum-product network.
-4. neurocard. an AR model over all tables in the database.
-5. ASM. an autoregressive model for per-table  statistics estimation in the database, with multi-dimensional statistics merging based on importance sampling for estimating sub-queries.
+~~3. FLAT. factorize-split-sum-product network.~~ Not applicable because .
+3. neurocard. an AR model over all tables in the database.
+~~5. ASM. an autoregressive model for per-table  statistics estimation in the database, with multi-dimensional statistics merging based on importance sampling for estimating sub-queries.~~ Not applicable because only the imdb,stack, and stats datasets are supported in the source code.
+4. NNGP.
+5. QSPN.
 
 we choose the following 6 datasets from the paper to test the models: 
 | **Dataset Name** | **Join Forms** | **Average Pairwise Correlation** | **Sectors** |
@@ -36,10 +38,10 @@ Experiment Records
 
 | **Dataset Name / model** | Accidents | Carcinogenesis | Consumer | Hockey | SSB | TalkingData |
 |--------------------------|-----------|----------------|----------|--------|-----|-------------|
-| PG | [X] | [X] | [X] | [X] | [X] | [X] |
-| MSCN |   |   |   |   |   |   |
-| FLAT |   |   |   |   |   |   |
-| neurocard | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| PG | [*] | [*] | [*] | [*] | [*] | [*] |
+| MSCN | [√] | [√] | [√] | [√] | [√] | [√] |
+| FLAT | [ ] | [ ] | [ ] | [ ] | [√] | [ ] |
+| neurocard | [X] | [X] | [X] | [X] | [√] | [X] |
 | ASM |   |   |   |   |   |   |
 
 qerror:

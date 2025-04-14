@@ -1,6 +1,66 @@
 import csv
+import re
+import pandas as pd
 import sqlglot
 
+from prepare_datasets_from_price import load_abbrev_coltype, load_tbls_cols_types
+
+
+def convert_str_back_2_numeric(sql_file_path, dataset, sqls_name):
+    parsed_sqls = []
+    tbls_cols_types, decimal_tbls_cols = load_tbls_cols_types(f"/home/user/oblab/PRICE/datas/datasets/{dataset}/postgres_create_{dataset}.sql")
+    abbrev, col_type = load_abbrev_coltype(f'/home/user/oblab/PRICE/datas/statistics/pretrain/{dataset}/abbrev_col_type.pkl')
+    alias2table = {v: k for k, v in abbrev.items()}
+    
+    with open(f'{sql_file_path}/{dataset}/{sqls_name}.sql', 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            sql = line.split("||")[0]
+            columns, tables, joins, ref_to_tables = parse_sql(sql)
+            
+            table_filter_cols_dict = {}
+            for table in tables:
+                table_filter_cols_dict[table] = []
+            
+            for column in columns:
+                table, _ = column.split(".")[0], column.split(".")[1]
+                join_flag = False
+                for join in joins:
+                    left_join_col, right_join_col = join.split("=")[0].strip(), join.split("=")[1].strip()
+                    if column == left_join_col or column == right_join_col:
+                        join_flag = True
+                        break
+                if not join_flag:
+                    table_filter_cols_dict[table].append(column)
+                    
+            filter_columns = flatten_list(list(table_filter_cols_dict.values()))
+            parsed_sql = line
+            
+            for filter_column in filter_columns:
+                alias, col = filter_column.split(".")[0], filter_column.split(".")[1]
+                
+                if col in decimal_tbls_cols[alias2table[alias]] or tbls_cols_types[alias2table[alias]][col] != pd.StringDtype():
+                    
+                    pattern = re.compile(
+                        r'({})\s*([<>]=?|=)\s*([\'"])([+-]?\d+\.?\d*)\3'.format(re.escape(filter_column)),
+                        re.IGNORECASE
+                    )
+                    def replacement(match):
+                        var = match.group(1)
+                        op = match.group(2)
+                        num = match.group(4)
+                        return f"{var} {op} {num}"
+                    
+                    parsed_sql = pattern.sub(replacement, parsed_sql)
+            
+            parsed_sqls.append(parsed_sql)
+            
+            
+    with open(f'{sql_file_path}/{dataset}/{sqls_name}.sql', 'w') as f:
+        for parsed_sql in parsed_sqls:
+            f.write(parsed_sql)
+            
+    return 0
 
 def parse_sql_2_feature_csv(sql_file_path, dataset, method, delimiter='#', sqls_name='workloads_3000'):
     '''
@@ -162,9 +222,30 @@ def parse_sql(sql):
         for eq in paresd_sql.args["where"].find_all(sqlglot.exp.EQ):
             if isinstance(eq.args["expression"], sqlglot.exp.Column):
                 joins.append(str(eq))
-        return columns, tables, joins, ref_to_tables
+        return columns, tables, joins, ref_to_tables 
+    
+def flatten_list(nested_list):
+        """ flatten a nested list
+
+        :param nested_list: nested list (type: list)
+        :return: flattened list (type: list)
+
+        >>> flatten_list([1, [2], 3, [4, 5, 6], [7, 8], 9])
+            [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        """
+        flattened_list = []
+        for item in nested_list:
+            if isinstance(item, list):
+                flattened_list.extend(flatten_list(item))
+            else:
+                flattened_list.append(item)
+        return flattened_list
+    
     
 if __name__ == "__main__":
     # parse_sql_2_feature_csv('/home/user/oblab/CE-baselines/test_dataset_training/mscn', 'ssb', 'neurocard', sqls_name='workloads')
-    parse_sql_2_feature_csv_2('/home/user/oblab/CE-baselines/test_dataset_training/workloads/', 'talkingdata', 'mscn', sqls_name='workloads') # For test set
+    parse_sql_2_feature_csv_2('/home/user/oblab/CE-baselines/test_dataset_training/workloads/', 'talkingdata', 'mscn', sqls_name='workloads_subqueries') # For test set
     # parse_sql_2_feature_csv_2('/home/user/oblab/PRICE/datas/workloads/pretrain/', 'carcinogenesis', 'mscn', sqls_name='workloads') # For train set
+    # convert_str_back_2_numeric('/home/user/oblab/CE-baselines/test_dataset_training/workloads', 'talkingdata', 'workloads_subqueries')
+    # for db in ['accidents', 'carcinogenesis', 'consumer', 'hockey', 'ssb']:
+    #     convert_str_back_2_numeric('/home/user/oblab/CE-baselines/test_dataset_training/workloads', db, 'workloads_subqueries')

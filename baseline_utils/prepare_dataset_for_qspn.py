@@ -23,6 +23,7 @@ def prase_table_datas(folder_path, out_folder_path, db):
                 table_bk = table.copy()
                 
                 col_value_dicts = {}
+                use_cols = []
                 
                 for column in table.columns:
                     if not pd.api.types.is_numeric_dtype(table[column]):
@@ -32,10 +33,16 @@ def prase_table_datas(folder_path, out_folder_path, db):
                         mapping = {v: i for i, v in enumerate(index)}
                 
                         col_value_dicts[column] = mapping
+                        
+                    if table[column].unique().size == 1:
+                        print(f"column {column} in table {tablename} has only one value, it will be removed")
+                        continue
+                    
+                    use_cols.append(column)
                     
                 table_value_dicts[tablename] = col_value_dicts
-                
-                table_bk.to_csv(f"{out_path}/{tablename}.csv", sep=',', index=False, quotechar='"', escapechar='\\', encoding='utf-8')
+                print(f'use_cols for table {tablename}: {use_cols}')
+                # table_bk.to_csv(f"{out_path}/{tablename}.csv", sep=',', index=False, quotechar='"', escapechar='\\', encoding='utf-8', columns=use_cols)
                 
     return table_value_dicts
 
@@ -102,11 +109,11 @@ if __name__ == "__main__":
     db = "ssb"
     table_value_dicts = prase_table_datas(folder_path, out_folder_path, db)
     
-    file_path = f"/home/user/oblab/CE-baselines/test_dataset_training/mscn/{db}/train.csv"
-    out_file_path = f"/home/user/oblab/CE-baselines/QSPN/data/{db}/queries/train.csv"
-    prase_query_datas(file_path, out_file_path, table_value_dicts)
+    # file_path = f"/home/user/oblab/CE-baselines/test_dataset_training/mscn/{db}/train.csv"
+    # out_file_path = f"/home/user/oblab/CE-baselines/QSPN/data/{db}/queries/train.csv"
+    # prase_query_datas(file_path, out_file_path, table_value_dicts)
     
-    file_path = f"/home/user/oblab/CE-baselines/test_dataset_training/mscn/{db}/workloads.csv"
-    out_file_path = f"/home/user/oblab/CE-baselines/QSPN/data/{db}/queries/workloads.csv"
+    file_path = f"/home/user/oblab/CE-baselines/test_dataset_training/mscn/{db}/workloads_subqueries.csv"
+    out_file_path = f"/home/user/oblab/CE-baselines/QSPN/data/{db}/queries/workloads_subqueries.csv"
     prase_query_datas(file_path, out_file_path, table_value_dicts)
     

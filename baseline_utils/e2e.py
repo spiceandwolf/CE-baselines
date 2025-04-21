@@ -31,7 +31,7 @@ def get_test_set_e2e_time(test_set_filename, test_set_db, optimal_pg_or_model, d
         sql = line.split("||")[0]
 
         # NOTE: test origin query's execution time and skip all subqueries
-        if sql.startswith("select"):
+        if sql.startswith("SELECT"):
             total_cnt += 1
             data_interactor.pull_subquery_card()
             result = data_interactor.execute(sql)    
@@ -41,7 +41,7 @@ def get_test_set_e2e_time(test_set_filename, test_set_db, optimal_pg_or_model, d
             cnt = 0
             for k in result.subquery_2_card.keys():
                 subquery = lines[i + cnt + 1].split("||")[0]
-                assert not subquery.startswith("select"), "subquery must not start with select"
+                assert not subquery.startswith("SELECT"), "subquery must not start with select"
                 true_card = lines[i + cnt + 1].split("||")[1]
                 model_est_card = lines[i + cnt + 1].split("||")[2]
 
@@ -74,7 +74,7 @@ def get_test_set_e2e_time(test_set_filename, test_set_db, optimal_pg_or_model, d
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--query_file", help="path to input query file (csv)", type = str)
+    parser.add_argument("--query_file", help="path to input query file", type = str)
     parser.add_argument("--db", help="'accidents', 'carcinogenesis', 'consumer', 'hockey', 'ssb', ... (default: ssb)", type = str, default ="ssb")
     parser.add_argument("--method", help="pg, optimal, model (default: pg)", type = str, default ="pg")
     

@@ -12,8 +12,8 @@ if __name__ == '__main__':
     
     dataset_name = args.db
     input_file = f'{args.workload_in_path}/workloads.sql' 
-    out_train_file = f'{args.workload_out_path}/train.sql'
-    out_test_file = f'{args.workload_out_path}/workloads.sql'
+    out_train_file = f'{args.workload_out_path}/train_but_not_checked.sql'
+    out_test_file = f'{args.workload_out_path}/workloads_but_not_checked.sql'
     n_test_sql = args.n_test_sql
     random.seed(2025)
     

@@ -45,9 +45,14 @@ if __name__ == '__main__':
         data_interactor.pull_record()
         result = data_interactor.execute(sql)
         
-        subqueries = list(result.subquery_2_card.keys())
-        est_card = result.subquery_2_card[subqueries[-1]]
-        exe_true_card = int(result.records.values[0][0])
+        try:
+            subqueries = list(result.subquery_2_card.keys())
+            est_card = result.subquery_2_card[subqueries[-1]]
+            exe_true_card = int(result.records.values[0][0])
+        except Exception as e:
+            print(f"sql: {sql}")
+            print(f"error: {e}")
+            continue
         
         if int(exe_true_card) != int(true_cards[i]):
             n_diff += 1

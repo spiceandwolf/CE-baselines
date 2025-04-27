@@ -31,7 +31,7 @@ def get_test_set_e2e_time(test_set_filename, test_set_db, optimal_pg_or_model, d
         sql = line.split("||")[0]
 
         # NOTE: test origin query's execution time and skip all subqueries
-        if sql.startswith("SELECT"):
+        if sql.startswith(("SELECT", "select")):
             total_cnt += 1
             data_interactor.pull_subquery_card()
             result = data_interactor.execute(sql)    

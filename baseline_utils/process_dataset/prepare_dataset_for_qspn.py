@@ -113,7 +113,7 @@ if __name__ == "__main__":
     # out_file_path = f"/home/user/oblab/CE-baselines/QSPN/data/{db}/queries/train.csv"
     # prase_query_datas(file_path, out_file_path, table_value_dicts)
     
-    file_path = f"/home/user/oblab/CE-baselines/test_dataset_training/mscn/{db}/workloads_subqueries.csv"
-    out_file_path = f"/home/user/oblab/CE-baselines/QSPN/data/{db}/queries/workloads_subqueries.csv"
-    prase_query_datas(file_path, out_file_path, table_value_dicts)
+    # file_path = f"/home/user/oblab/CE-baselines/test_dataset_training/mscn/{db}/workloads_subqueries.csv"
+    # out_file_path = f"/home/user/oblab/CE-baselines/QSPN/data/{db}/queries/workloads_subqueries.csv"
+    # prase_query_datas(file_path, out_file_path, table_value_dicts)
     

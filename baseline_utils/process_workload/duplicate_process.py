@@ -1,35 +1,62 @@
 import argparse
+import collections
+import csv
+import os
+from pathlib import Path
 import pandas as pd
+import sqlglot
 
 
 def duplicate_remove(train_lines, test_lines, train_file):
-    test_set = set(test_lines)
-    for train_line in train_lines:
-        if train_line in test_set:
-            print(f"Duplicate found in train file: {train_line.strip()}")
-            train_lines.remove(train_line)
+    duplicate_processed = []
     
-    with open(train_file, 'w') as f:
-        for line in train_lines:
-            f.write(line)
-            '''
-            not finish!
-            '''
-
+    test_set = collections.defaultdict(list)
+    for test_line in test_lines:
+        tables = frozenset(test_line[0].split(","))
+        predicates = test_line[2].split(",")
+        predicates = set([tuple(predicates[i: i+3]) for i in range(0, len(predicates), 3)])
+        test_set[tables].append(predicates)
+        
+    for i, train_line in enumerate(train_lines):
+        tables = frozenset(train_line[0].split(","))
+        predicates = train_line[2].split(",")
+        predicates = set([tuple(predicates[i: i+3]) for i in range(0, len(predicates), 3)])
+        if any(predicates == test_predicates for test_predicates in test_set[tables]):
+            print(f"Duplicate found in {i}th sql: {train_line}")
+        else:
+            duplicate_processed.append(train_line)
+            
+    train_file_path = Path(train_file)
+    train_duplicate_removed_path = train_file_path.with_name(train_file_path.stem + "_duplicate_removed" + train_file_path.suffix)
+    with open(train_duplicate_removed_path, 'w') as file:
+        writer = csv.writer(file, delimiter="#", escapechar='\\',)
+        writer.writerows(duplicate_processed)
+            
 def duplicate_check(train_lines, test_lines):
     n_duplicate = 0
         
+    # test_set = collections.defaultdict(list)
     test_set = set()
     for test_line in test_lines:
-        sql = test_line.split("||")[0]
+    #     tables = frozenset(test_line[0].split(","))
+    #     predicates = test_line[2].split(",")
+    #     predicates = set([tuple(predicates[i: i+3]) for i in range(0, len(predicates), 3)])
+    #     test_set[tables].append(predicates)
+        sql = sqlglot.parse_one(test_line.split("||")[0], dialect='postgres')
         test_set.add(sql)
         
     print(f"test len: {len(test_set)} train len: {(len(train_lines))}")
         
-    for train_line in train_lines:
-        sql = train_line.split("||")[0]
+    for i, train_line in enumerate(train_lines):
+        # tables = frozenset(train_line[0].split(","))
+        # predicates = train_line[2].split(",")
+        # predicates = set([tuple(predicates[i: i+3]) for i in range(0, len(predicates), 3)])
+        # if any(predicates == test_predicates for test_predicates in test_set[tables]):
+        #     print(f"Duplicate found in {i}th sql: {train_line}")
+        #     n_duplicate += 1
+        sql = sqlglot.parse_one(train_line.split("||")[0], dialect='postgres')
         if sql in test_set:
-            print(f"Duplicate found in train and test files: {train_line.strip()}")
+            print(f"Duplicate found in {i}th sql: {train_line}")
             n_duplicate += 1
             
     print(f"Number of duplicates found: {n_duplicate}")
@@ -47,9 +74,11 @@ if __name__ == '__main__':
     test_file = args.test_file
     
     with open(test_file, 'r') as f:
+        # test_lines = list(list(rec) for rec in csv.reader(f, delimiter='#', escapechar='\\',))
         test_lines = f.readlines()
         
     with open(train_file, 'r') as f:
+        # train_lines = list(list(rec) for rec in csv.reader(f, delimiter='#', escapechar='\\',))
         train_lines = f.readlines()
         
     if method == 'check':

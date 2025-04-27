@@ -1,4 +1,4 @@
-DB='accidents'
+DB='ssb'
 OUTPUT='/home/user/oblab/CE-baselines/test_dataset_training/mscn/'
 DATA_PATH='/home/user/oblab/PRICE/datas'
 QUERY_FILE="/home/user/oblab/CE-baselines/test_dataset_training/mscn/$DB/train.csv"

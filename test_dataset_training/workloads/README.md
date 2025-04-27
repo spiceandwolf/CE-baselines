@@ -30,29 +30,24 @@ compared to the baseball dataset, these datasets have some features:
 1. the join forms of these datasets include chain, star and mixed. there are 2 datasets for each join form, and one of the average pairwise correlation of the datasets is higher than the average pairwise correlation of the baseball dataset, and the another is lower.
 2. the sectors of these datasets are diverse.
 
+After testing each model, the SQL queries from [*workloads_subqueries.sql*] are combined with the model's cardinality estimation results and saved as the corresponding [*{db}_perror_input.sql*]. This process can be achieved using [*baseline_utils/prepare_perror_input.sh*].  
+
+Finally, [*baseline_utils/test_e2e.sh*] uses PostgreSQL to process the data in [*{db}_perror_input.sql*], obtaining the end-to-end (e2e) execution time when using the model's cardinality estimates.
+
 ## NOTICE!!
 During testing, we found that the workload provided by the pretrained "price" contained queries with incorrect true card values, necessitating the recalculation of true cards for all queries.  
 
-We used [*get_true_card.sh*] to obtain the correct true cards, primarily involving [*train_but_not_checked.sql*] and [*workloads.sql*], which correspond to the training dataset and test dataset, respectively. The processed results of the former are saved in [*train_data.sql*], while the latter's results are stored in [*workloads_data.sql*]. If no errors are detected, the process further generates two files: [*workloads_subqueries.sql*] and [*workloads_subqueries_all.sql*].
+We used [*get_true_card.sh*] to obtain the correct true cards, primarily involving [*train_but_not_checked.sql*] and [*workloads_but_not_checked.sql*], which correspond to the training dataset and test dataset, respectively. The processed results of the former are saved in [*train_data.sql*], while the latter's results are stored in [*workloads_data.sql*]. If no errors are detected, the process further generates two files: [*workloads_subqueries.sql*] and [*workloads_subqueries_all.sql*].
 
-accidents:  workloads.sql 修正未完成
-carcinogenesis:  workloads.sql 修正未完成
-consumer:  workloads.sql 修正已完成
-hockey:  workloads.sql 修正未完成
-ssb:  workloads.sql 修正已完成
-talkingdata:  workloads.sql 修正未完成
+In the original code, neurocard can process queries with predicate values that `exist in the dataset`. 
 
-## plan A : Generating Ourselves Test Workloads
+## plan A : Generating Ourselves Test Workloads 训练数据存在问题！
 
 Since the test workloads provided in price only include workloads for horizontal comparison baselines on four datasets, other datasets have pre-trained workloads but lack corresponding test workloads. Therefore, we need to generate these test workloads for the selected datasets ourselves. The program [*generate_test_queries.sh*], which generates query statements for these workloads, is implemented based on the pseudocode provided in price. Before using the script, determine the variables within it based on the actual usage requirements.
 
 One notable feature of the workloads provided by price is that the filter predicate operators in the pre-training SQL statements do not include the '<=' operator, which directly impacts the MSCN model. In the pre-trained workloads provided by Price, the range query predicates actually only utilize the operators '>=' and '<', which is presumably derived from the form of [x, y).
 
 During testing, the generated workload is not directly used. Instead, the [*workloads_subqueries.sql*] file obtained by running [*workloads.sql*] in PostgreSQL (with subqueries included) is utilized. You can use [*baseline_utils/subquery_all.sh*] with [*workloads.sql*] as input to generate both [*workloads_subqueries.sql*] and [*workloads_subqueries_all.sql*].  
-
-After testing each model, the SQL queries from [*workloads_subqueries.sql*] are combined with the model's cardinality estimation results and saved as the corresponding [*{db}_perror_input.sql*]. This process can be achieved using [*baseline_utils/prepare_perror_input.sh*].  
-
-Finally, [*baseline_utils/test_e2e.sh*] uses PostgreSQL to process the data in [*{db}_perror_input.sql*], obtaining the end-to-end (e2e) execution time when using the model's cardinality estimates.
 
 Experiment Records
 
@@ -86,7 +81,7 @@ qerror:
     ssb: (There are two subqueries that do not have equal joins so these two subqueries are removed) 
         pg: 'max': 5999002.5, 'p99': 5999002.5, 'p95': 856442.9375, 'median': 159.5
         neurocard: 'max': 12.0, 'p99': 4.264999999999986, 'p95': 2.0, 'median': 1.0589522461063199 
-        mscn(100 epochs): 'max': 281884.8, 'p99': 30895.059999999925, 'p95': 4519.574999999992, 'median': 1.920424910411067 | total: 162.4644s
+        mscn(100 epochs): 'max': 128268.2, 'p99': 13612.458333333298, 'p95': 6558.7999999999965, 'median': 1.6066879262216882 | total: 162.4644s
         ours: max': 96.0149, 'p99': 52.6778, 'p95': 17.9998 , 'median': 3.1883
     talkingdata:
         pg: 'max': 1645533866.8333, 'p99': 5547184.32, 'p95': 149308.4766, 'median': 50.0232 
@@ -98,5 +93,45 @@ qerror:
 During testing, we actually don't need too many SQL queries for evaluation. According to the PRICE paper, the four unseen datasets used for testing each contain workloads with no more than 200 SQL queries. Therefore, we can use the 50,000 SQL queries per dataset provided by PRICE as a base and select 150 queries to form the test workload, while the remaining queries can serve as the training workload for query-driven methods. We use [*separate_workload_in_PRICE.sh*] to achieve this goal.
 
 qerror:
+    accidents:
+        mscn: Median: 2.3792315881157458 90th percentile: 12.859676438015885 95th percentile: 28.762032085561497 99th percentile: 137.4044000000001 Max: 172.55992923485184 Mean: 8.252724357473419  
+    carcinogenesis:
+        mscn: Median: 1.2770794966236956 90th percentile: 4.764867761652328 95th percentile: 8.328659858394534 99th percentile: 44.46534653465346 Max: 1636.264913803795 Mean: 5.382034163737616 
+    consumer:
+        mscn: Median: 1.1932463872615129 90th percentile: 2.047357634985432 95th percentile: 2.807815870931432 99th percentile: 17.80240688878755 Max: 34.45711264963678 Mean: 1.7951921215770403 
+    hockey
+        mscn: Median: 1.9950641563819709 90th percentile: 8.824060869515415 95th percentile: 12.36 99th percentile: 35.61010909961702 Max: 361.2857142857143 Mean: 4.187611906704775 
     ssb:
-        mscn: Median: 1.1136123620296812 90th percentile: 1.4267554573200747 95th percentile: 1.8003565062388591 99th percentile: 3.115334511665905 Max: 6.434930610107358 Mean: 1.2247480076475559
+        mscn: Median: 1.2211637794907775 90th percentile: 2.1613969765103067 95th percentile: 2.6103419811320747 99th percentile: 6.481956552205302 Max: 10.175879396984925 Mean: 1.51925219725254 
+        neurocard: median 1.0455720326457405 95th 1.8536584386684134 99th 9.466131970043968 max 15.217469879518072
+    talkingdata:
+        mscn: Median: 2.0079948141745896 90th percentile: 11.63364413364413 95th percentile: 23.451775174370866 99th percentile: 160.43436325521148 Max: 27338.835373075406 Mean: 40.96490352533517 
+
+
+Experiments on each dataset are repeated 5 times, and the final result is the average of these 5 repetitions.
+
+e2e: 
+    accidents:
+        optimal: 530.8259s | 529.3965999999999s |
+        pg:
+        mscn: 515.1636s | 530.2293s | 530.4909s |
+    carcinogenesis:
+        optimal: 31.852s | 30.9281s |
+        pg:
+        mscn: 32.8008s | 32.9041s | 32.9403s |
+    consumer:
+        optimal: 36.2969s | 37.3148s |
+        pg:
+        mscn: 35.3424s | 36.1484s | 36.0897s | 
+    hockey:
+        optimal: 2.4446s | 2.3649999999999998s |
+        pg:
+        mscn: 2.8406000000000002s | 2.7658s | 2.9419s |
+    ssb:
+        optimal: 191.9297s | 187.7422s | 
+        pg:
+        mscn: 184.4159s | 187.6913s | 186.6405s |
+    talkingdata:
+        optimal: 707.1387s | 694.8004s |
+        pg:
+        mscn: 724.8424s | 753.3438s | 754.4938s |

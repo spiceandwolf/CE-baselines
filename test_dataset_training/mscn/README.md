@@ -27,9 +27,9 @@ Prior to initiating the training process, it is necessary to prepare the followi
     ```
     python3 price_test_train.py --num_queries 50000 --train_queries <train_queries> --test_queries <test_queries> --cuda <dataset>
     
-    python3 price_test_train.py --num_queries 49850 --train_queries /home/user/oblab/CE-baselines/test_dataset_training/mscn/ --test_queries /home/user/oblab/CE-baselines/test_dataset_training/mscn --cuda ssb
+    python3 price_test_train.py --num_queries 49423 --train_queries /home/user/oblab/CE-baselines/test_dataset_training/mscn/ --test_queries /home/user/oblab/CE-baselines/test_dataset_training/mscn --cuda ssb
 
-    python evaluate.py --num_queries 49850 --train_queries /home/user/oblab/CE-baselines/test_dataset_training/mscn/ --batch 4096 --cuda --test_file_path /home/user/oblab/CE-baselines/test_dataset_training/mscn --db ssb
+    python evaluate.py --num_queries 49423 --train_queries /home/user/oblab/CE-baselines/test_dataset_training/mscn/ --cuda --test_file_path /home/user/oblab/CE-baselines/test_dataset_training/mscn --db ssb
     ```
 
 Because the pretrain workloads in PRICE lack predicates of type <=, it is necessary to modify occurrences of <= to < in **price_test.util.get_all_operators()** and increment the corresponding value by 1.

@@ -34,15 +34,15 @@ def prase_table_datas(folder_path, out_folder_path, db):
                 
                         col_value_dicts[column] = mapping
                         
-                    if table[column].unique().size == 1:
-                        print(f"column {column} in table {tablename} has only one value, it will be removed")
-                        continue
+                    # if table[column].unique().size == 1:
+                    #     print(f"column {column} in table {tablename} has only one value, it will be removed")
+                    #     continue
                     
                     use_cols.append(column)
                     
                 table_value_dicts[tablename] = col_value_dicts
                 print(f'use_cols for table {tablename}: {use_cols}')
-                # table_bk.to_csv(f"{out_path}/{tablename}.csv", sep=',', index=False, quotechar='"', escapechar='\\', encoding='utf-8', columns=use_cols)
+                table_bk.to_csv(f"{out_path}/{tablename}.csv", sep=',', index=False, quotechar='"', escapechar='\\', encoding='utf-8', columns=use_cols)
                 
     return table_value_dicts
 

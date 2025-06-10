@@ -170,3 +170,4 @@ E2E-result/*
 **/*.bitmaps
 test_dataset_training/**/*.png
 !test_dataset_training/qspn/**/*.csv
+baseline_utils/draw_fig/*.pdf

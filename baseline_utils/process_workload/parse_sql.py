@@ -18,6 +18,14 @@ def parse_sql_2_feature_csv_3(sql_file_path, dataset, delimiter='#', sqls_name='
     file_value_index_dicts = f"/home/user/oblab/CE-baselines/test_dataset_training/mscn/{dataset}/value_index_dicts.json"
     with open(file_value_index_dicts, 'r') as f:
         column_value_index_dicts = json.load(f)
+        
+    # test_set = set()
+    # file_workload = f"/home/user/oblab/CE-baselines/test_dataset_training/workloads/{dataset}/workloads_subqueries.sql"
+    # with open(file_workload, 'r') as f:
+    #     test_lines = f.readlines()
+    # for test_line in test_lines:
+    #     sql = sqlglot.parse_one(test_line.split("||")[0], dialect='postgres')
+    #     test_set.add(sql)
     
     parsed_sqls = []
     with open(f'{sql_file_path}/{dataset}/{sqls_name}.sql', 'r') as f:
@@ -25,6 +33,9 @@ def parse_sql_2_feature_csv_3(sql_file_path, dataset, delimiter='#', sqls_name='
         for line in lines:
             spilt_infos = line.split("||")
             sql, true_card, pg_est_card = spilt_infos[0], spilt_infos[1], spilt_infos[2]
+            # sql_tree = sqlglot.parse_one(sql, dialect='postgres')
+            # if sql_tree in test_set:
+            #     continue
             columns, tables, joins, ref_to_tables = parse_sql(lower_except_quotes(sql))
             
             tables = [ref_to_tables[table] for table in tables]
@@ -72,11 +83,11 @@ def parse_sql_2_feature_csv_3(sql_file_path, dataset, delimiter='#', sqls_name='
             parsed_sqls.append(parsed_sql)
     # sqls_name = 'train' # When converting the test set, comment it out
     with open(f'/home/user/oblab/CE-baselines/test_dataset_training/qspn/{dataset}/{sqls_name}.csv', 'w') as f:
+    # with open(f'/home/user/oblab/CE-baselines/test_dataset_training/qspn/{dataset}/train.csv', 'w') as f:    
         writer = csv.writer(f, delimiter=delimiter, quoting=csv.QUOTE_NONE, escapechar='\\')
         for parsed_sql in parsed_sqls:
             writer.writerow(parsed_sql)   
     
-
 def convert_str_back_2_numeric(sql_file_path, dataset, sqls_name):
     '''
     some sqls have wrong format, i.e., a = '1.53'. use it to convert the mistake.
@@ -192,7 +203,8 @@ def parse_sql_2_feature_csv(sql_file_path, dataset, method, delimiter='#', sqls_
                  true_card]
             parsed_sqls.append(parsed_sql)
     
-    with open(f'/home/user/oblab/CE-baselines/test_dataset_training/{method}/{dataset}/{sqls_name}.csv', 'w') as f:
+    # with open(f'/home/user/oblab/CE-baselines/test_dataset_training/{method}/{dataset}/{sqls_name}.csv', 'w') as f:
+    with open(f'/home/user/oblab/CE-baselines/QSPN/data/{dataset}/queries/train.csv', 'w') as f:    
         writer = csv.writer(f, delimiter=delimiter, quoting=csv.QUOTE_NONE, escapechar='\\')
         for parsed_sql in parsed_sqls:
             writer.writerow(parsed_sql)    
@@ -317,11 +329,11 @@ def flatten_list(nested_list):
     
     
 if __name__ == "__main__":
-    # parse_sql_2_feature_csv('/home/user/oblab/CE-baselines/test_dataset_training/workloads', 'ssb', 'neurocard', sqls_name='workloads_subqueries')
+    # parse_sql_2_feature_csv('/home/user/oblab/PRICE/datas/workloads/finetune', 'genome', 'neurocard', sqls_name='workloads')
     # parse_sql_2_feature_csv_2('/home/user/oblab/CE-baselines/test_dataset_training/workloads/', 'talkingdata', 'mscn', sqls_name='workloads_subqueries') # For test set
     # for db in ['accidents', 'carcinogenesis', 'consumer', 'hockey', 'ssb', 'talkingdata']:
         # parse_sql_2_feature_csv_2('/home/user/oblab/CE-baselines/test_dataset_training/workloads', 'ssb', 'mscn', sqls_name='train_data') # For train set
     # convert_str_back_2_numeric('/home/user/oblab/CE-baselines/test_dataset_training/workloads', 'talkingdata', 'workloads_subqueries')
     # for db in ['accidents', 'carcinogenesis', 'consumer', 'hockey', 'ssb', 'talkingdata']:
         # convert_str_back_2_numeric('/home/user/oblab/CE-baselines/test_dataset_training/workloads', db, 'workloads_subqueries')
-    parse_sql_2_feature_csv_3('/home/user/oblab/CE-baselines/test_dataset_training/workloads', 'accidents', sqls_name='workloads_subqueries')
+    parse_sql_2_feature_csv_3('/home/user/oblab/CE-baselines/test_dataset_training/workloads', 'carcinogenesis', sqls_name='workloads_subqueries')

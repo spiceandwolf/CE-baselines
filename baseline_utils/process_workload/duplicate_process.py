@@ -60,6 +60,19 @@ def duplicate_check(train_lines, test_lines):
             n_duplicate += 1
             
     print(f"Number of duplicates found: {n_duplicate}")
+    
+def duplicate_self_check(lines):
+    n_duplicate = 0
+    sql_set = set()
+    for i, line in enumerate(lines):
+        sql = sqlglot.parse_one(line.split("||")[0], dialect='postgres')
+        if sql in sql_set:
+            print(f"Duplicate found in {i}th sql: {line}")
+            n_duplicate += 1
+        sql_set.add(sql)
+            
+    
+    return n_duplicate
 
 if __name__ == '__main__':
     
@@ -83,5 +96,9 @@ if __name__ == '__main__':
         
     if method == 'check':
         duplicate_check(train_lines, test_lines)
+    elif method == 'self_check':
+        print(f"Checking {train_file} for duplicates...")
+        n_duplicate = duplicate_self_check(train_lines)
+        print(f"Number of duplicates found in {train_file}: {n_duplicate}")
     elif method == 'remove':
         duplicate_remove(train_lines, test_lines, train_file)

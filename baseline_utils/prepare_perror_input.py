@@ -58,6 +58,12 @@ def generate_perror_input_factory(subqueries_file, subqueries_all_file, cards_fi
             for line in lines:
                 card = line.strip().split(",")[0]
                 cards.append(float(card))
+    elif method in ['qspn',]:
+        with open(cards_file, "r") as f:
+            lines = f.readlines()
+            for line in lines[1:]:
+                card = line.strip().split(",")[1]
+                cards.append(float(card))
     
     output_path = f"{output_path}/{db}_perror_input.sql"
     generate_perror_input(cards, output_path, subqueries_file, subqueries_all_file, False)

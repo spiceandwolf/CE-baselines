@@ -1,1 +1,0 @@
-在QSPN中无法处理float以外的数据类型，因此要提前将训练集与测试集的查询语句中所有字符类型的数据替换成数值型数据，可以使用[*parse_sql.py/parse_sql_2_feature_csv_3*]生成符合条件的scv。
